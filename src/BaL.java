@@ -26,7 +26,7 @@ class BaL {
     					//qui est accédée par les méthodes put et get ci dessous
 	private Integer compteur = 0;
 
-    public synchronized void put(String put_data) {
+    public synchronized void put(String put_data, String name) {
         
     	// si un thread a écrit un message on attend. 
     	// Lorsque la méthode get aura vidé

@@ -29,6 +29,7 @@ public class Gestionnaire {
         Thread tprod;
         Socket connexionSocket ;
         int i =0;
+
         while(true){
             try{
                 connexionSocket = sockServ.accept();

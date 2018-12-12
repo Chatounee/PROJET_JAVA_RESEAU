@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 /**
  * 
@@ -25,10 +26,14 @@ import java.net.Socket;
  **/
 class Producteur implements Runnable {
 	private Socket socketCli;
+	private String name;
 
 	public Producteur(Socket socketCli) {
 		this.socketCli = socketCli;
+		name = Thread.currentThread().getName();
 	}
+
+
 
 	/**
 	 * Méthode utilisée lorsque le thread passe à l'état "RUNNING"
@@ -36,12 +41,16 @@ class Producteur implements Runnable {
 	public void run() {
 		//System.out.println(Thread.currentThread().getName()+" is running");
 		// tant que le nombre de messages à afficher n'est pas atteint
+		String msg;
 		
 		do{
-			// ecriture d'un message dans la boite aux lettres
-			Exo_07.bal.put("Msg du client");
-			//System.out.println(Thread.currentThread().getName()+": j'ai déposé un message");
-		}while(true);
+			msg = entreeMessage();
+
+			if(!msg.equals("bye")){
+				// ecriture d'un message dans la boite aux lettres
+				Exo_07.bal.put(msg, name);
+			}
+		}while(!msg.equals("bye"));
 
 
 		
@@ -49,11 +58,18 @@ class Producteur implements Runnable {
 	}// fin du run
 
 	public void deconnexion(){
+		//Ajouter msg : machin s'est déconnecté
 		try {
 			socketCli.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
+  public String entreeMessage(){
+    Scanner sc = new Scanner(System.in);
+    String msg = sc.nextLine();
+    return msg;
+  }
 
 }
