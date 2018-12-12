@@ -1,4 +1,4 @@
-import java.net.Socket;
+import java.net.DatagramPacket;
 
 /**
  * 
@@ -26,10 +26,10 @@ class Consommateur implements Runnable {
 
 	public void run() {
 	    
-		String tmp;
+		String[] tmp;
 		//System.out.println(Thread.currentThread().getName()+" is running");
 		// tant que l'on a pas atteind le nombre total de message à afficher
-		for (int i=0;i<Exo_07.nbrMsg*Exo_07.nbrProd;i++){
+		while(true){
 			try {
 			    Thread.sleep((int)(Math.random()*1000));
 			} catch (InterruptedException e) { 
@@ -37,9 +37,15 @@ class Consommateur implements Runnable {
 			    System.exit (1) ;
 			}
 
-			tmp = Exo_07.bal.get();
-			System.out.println(Thread.currentThread().getName()
-					+" "+tmp+String.valueOf(Exo_07.nbrMsg*Exo_07.nbrProd)+")");
+			tmp = Gestionnaire.bal.get();
+
+			for (Thread threadCli: Gestionnaire.threads) {
+				if(!tmp[1].equals(threadCli.getName())){
+					//ENVOI MESSAGE A TOUT LE MONDE SAUF L'ENVOYEUR :) PARCE QUE C'EST NOTRE PROJJJJJJJJJJJJEEEEEEEEETTTTTTTTTTTTT
+					DatagramPacket dp = new DatagramPacket(tmp[0].getBytes(), tmp[0].length(), ((Producteur) threadCli).getSocketCli().getInetAddress(), 2018);
+
+				}
+			}
 		}
 		
 	}// fin du run

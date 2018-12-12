@@ -1,11 +1,14 @@
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Gestionnaire {
 
     protected static BaL bal=new BaL();
 
+    public static List<Thread> threads;
     public static ServerSocket sockServ;
 
     public static void main (String args[]) {
@@ -15,6 +18,8 @@ public class Gestionnaire {
         }catch (IOException e) {
             e.printStackTrace();
         }
+
+        threads = new ArrayList<>();
 
         //création du thread consommateur
         Thread conso = new Thread(new Consommateur(),"Conso");
@@ -34,7 +39,10 @@ public class Gestionnaire {
             try{
                 connexionSocket = sockServ.accept();
                 //Démarrage des threads producteur
-                tprod=new Thread(new Producteur(connexionSocket),"Prod-"+String.valueOf(i));
+                tprod=new Producteur(connexionSocket,"Prod-"+String.valueOf(i));
+
+                threads.add(tprod);
+
                 tprod.start();
                 i++;
             } catch (IOException e) {

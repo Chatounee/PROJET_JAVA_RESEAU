@@ -24,16 +24,17 @@ import java.util.Scanner;
  * @version 20161104-f
  * 
  **/
-class Producteur implements Runnable {
+class Producteur extends Thread {
 	private Socket socketCli;
-	private String name;
 
-	public Producteur(Socket socketCli) {
+	public Producteur(Socket socketCli, String name) {
+		super(name);
 		this.socketCli = socketCli;
-		name = Thread.currentThread().getName();
 	}
 
-
+	public Socket getSocketCli() {
+		return socketCli;
+	}
 
 	/**
 	 * Méthode utilisée lorsque le thread passe à l'état "RUNNING"
@@ -41,18 +42,18 @@ class Producteur implements Runnable {
 	public void run() {
 		//System.out.println(Thread.currentThread().getName()+" is running");
 		// tant que le nombre de messages à afficher n'est pas atteint
-		String msg;
-		
+		String[] data = new String[2];
+        data[1] = getName();
 		do{
-			msg = entreeMessage();
+			data[0] = entreeMessage();
 
-			if(!msg.equals("bye")){
+			if(!data[0].equals("bye")){
 				// ecriture d'un message dans la boite aux lettres
-				Exo_07.bal.put(msg, name);
+				Gestionnaire.bal.put(data);
 			}
-		}while(!msg.equals("bye"));
+		}while(!data[0].equals("bye"));
 
-
+		deconnexion();
 		
 		//System.out.println(Thread.currentThread().getName()+" a terminé son boulot.");
 	}// fin du run
@@ -66,10 +67,9 @@ class Producteur implements Runnable {
 		}
 	}
 
-  public String entreeMessage(){
-    Scanner sc = new Scanner(System.in);
-    String msg = sc.nextLine();
-    return msg;
-  }
+	public String entreeMessage(){
+		Scanner sc = new Scanner(System.in);
+		return sc.nextLine();
+	}
 
 }
