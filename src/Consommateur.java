@@ -40,20 +40,28 @@ class Consommateur implements Runnable {
 		while(true){
 			tmp = Gestionnaire.bal.get();
 
-			for (Thread threadCli: Gestionnaire.threads) {
-				if(((Producteur)threadCli).getPseudo() != null){
-					if(tmp[1].equals("all")){
-						try {
-							fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+            System.out.println("Message "+tmp[1]+" : "+tmp[0]);
 
-					}
-					else if(!tmp[1].equals(threadCli.getName())){
+			for (Thread threadCli: Gestionnaire.threads) {
+                if(tmp[1].equals("all")){
+                    tmp[1] = "Serveur -> "+tmp[1];
+                    try {
+                        fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
+                        fluxOut.newLine();
+                        fluxOut.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }else if(((Producteur)threadCli).getPseudo() != null){
+
+					if(!tmp[1].equals(threadCli.getName())){
 						//ENVOI MESSAGE A TOUT LE MONDE SAUF L'ENVOYEUR
+                        tmp[1] = ((Producteur)threadCli).getPseudo()+" -> "+tmp[1];
 						try {
 							fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
+							fluxOut.newLine();
+							fluxOut.flush();
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

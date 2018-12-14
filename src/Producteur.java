@@ -66,8 +66,7 @@ class Producteur extends Thread {
         Gestionnaire.bal.put(dataAll);
 
         data[0] = entreeMessage();
-        Gestionnaire.bal.put(data);
-
+		pseudo = data[0];
 
 
 		do{
