@@ -1,3 +1,6 @@
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.DatagramPacket;
 
 /**
@@ -23,6 +26,11 @@ import java.net.DatagramPacket;
  * 
  **/
 class Consommateur implements Runnable {
+	private BufferedWriter fluxOut;
+
+	public Consommateur() {
+		fluxOut = null;
+	}
 
 	public void run() {
 	    
@@ -30,21 +38,29 @@ class Consommateur implements Runnable {
 		//System.out.println(Thread.currentThread().getName()+" is running");
 		// tant que l'on a pas atteind le nombre total de message à afficher
 		while(true){
-			try {
-			    Thread.sleep((int)(Math.random()*1000));
-			} catch (InterruptedException e) { 
-			    System.out.println("Erreur : " + e ) ; 
-			    System.exit (1) ;
-			}
-
 			tmp = Gestionnaire.bal.get();
 
 			for (Thread threadCli: Gestionnaire.threads) {
-				if(!tmp[1].equals(threadCli.getName())){
-					//ENVOI MESSAGE A TOUT LE MONDE SAUF L'ENVOYEUR :) PARCE QUE C'EST NOTRE PROJJJJJJJJJJJJEEEEEEEEETTTTTTTTTTTTT
-					DatagramPacket dp = new DatagramPacket(tmp[0].getBytes(), tmp[0].length(), ((Producteur) threadCli).getSocketCli().getInetAddress(), 2018);
+				if(((Producteur)threadCli).getPseudo() != null){
+					if(tmp[1].equals("all")){
+						try {
+							fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 
+					}
+					else if(!tmp[1].equals(threadCli.getName())){
+						//ENVOI MESSAGE A TOUT LE MONDE SAUF L'ENVOYEUR
+						try {
+							fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					}
 				}
+
 			}
 		}
 		
