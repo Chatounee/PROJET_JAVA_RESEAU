@@ -19,6 +19,8 @@ public class Gestionnaire {
             e.printStackTrace();
         }
 
+        System.out.println("Serveur allumé en localhost sur le port 2018.");
+
         threads = new ArrayList<>();
 
         //création du thread consommateur

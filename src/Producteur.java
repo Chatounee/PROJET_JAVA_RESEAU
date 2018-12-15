@@ -2,30 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Scanner;
 
-/**
- * 
- * <b>TD M3102 Java : Exercice 07</b><br/>
- * 
- * Lance X threads producteurs et un thread consommateur. Les threads communiquent
- * entre eux par l'intermédiaire d'une instance de la classe BaL. Les producteurs écrivent 
- * un message que le Thread Consommateur affiche.
- * 
- * Écrire un programme Java qui démarre X threads déposant des messages dans une boîte aux lettres. 
- * Un thread récupère le message de la boîte aux lettres et l'affiche.
- * Classes : Exo_05, BAL, Consommateur (thread qui affiche le message), Producteur (thread qui envoie le message)
- * Utilisation de sleep(), wait() et synchronized
- * La classe BAL possède deux méthodes et au moins une variable de classe pour stocker le message :
- * put : écrit le message d'un thread producteur dans la variable
- * get : récupère la valeur de la variable
- * Les threads producteurs écrivent un message dans la boîte aux lettres lorsque la variable est vide.
- * Le thread consommateur affiche le contenu de la variable puis la vide.
- *
- * @author N. Ménard
- * @version 20161104-f
- * 
- **/
 class Producteur extends Thread {
 	private Socket socketCli;
 	private BufferedReader fluxIn;
@@ -50,23 +27,26 @@ class Producteur extends Thread {
 		return socketCli;
 	}
 
-	/**
-	 * Méthode utilisée lorsque le thread passe à l'état "RUNNING"
-	 */
 	public void run() {
 		//System.out.println(Thread.currentThread().getName()+" is running");
 		// tant que le nombre de messages à afficher n'est pas atteint
 		String[] data = new String[2];
         data[1] = getName();
 
-        String[] dataAll = new String[2];
-        dataAll[0] = "Bienvenue au nouvel utilisateur sur le serveur de Tchat : Veuillez renseigner votre nom : ";
-        dataAll[1] = "all";
+        String[] dataCli = new String[2];
+        dataCli[0] = "Bienvenue sur le serveur de Tchat : Veuillez renseigner votre nom : ";
+        dataCli[1] = "f"+getName(); //f+le nom du thread permet d'envoyer le message seulement au thread du même nom (for thread)
 
-        Gestionnaire.bal.put(dataAll);
+        Gestionnaire.bal.put(dataCli);
 
         data[0] = entreeMessage();
 		pseudo = data[0];
+
+		String[] dataAll = new String[2];
+		dataAll[0] = " vient de se connecter au serveur de tchat ! Souhaitez-lui la bienvenue :)";
+		dataAll[1] = getName();
+
+		Gestionnaire.bal.put(dataAll);
 
 
 		do{
@@ -84,8 +64,14 @@ class Producteur extends Thread {
 	}// fin du run
 
 	public void deconnexion(){
-		//Ajouter msg : machin s'est déconnecté
+		String[] dataAll = new String[2];
+		dataAll[0] = " vient de se deconnecter du serveur de tchat !";
+		dataAll[1] = getName();
+
+		Gestionnaire.bal.put(dataAll);
+
 		try {
+			fluxIn.close();
 			socketCli.close();
 		} catch (IOException e) {
 			e.printStackTrace();

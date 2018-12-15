@@ -1,30 +1,7 @@
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.DatagramPacket;
 
-/**
- * 
- * <b>TD M3102 Java : Exercice 07</b><br/>
- * 
- * Lance X threads producteurs et un thread consommateur. Les threads communiquent
- * entre eux par l'intermédiaire d'une instance de la classe BaL. Les producteurs écrivent 
- * un message que le Thread Consommateur affiche.
- * 
- * Écrire un programme Java qui démarre X threads déposant des messages dans une boîte aux lettres. 
- * Un thread récupère le message de la boîte aux lettres et l'affiche.
- * Classes : Exo_05, BAL, Consommateur (thread qui affiche le message), Producteur (thread qui envoie le message)
- * Utilisation de sleep(), wait() et synchronized
- * La classe BAL possède deux méthodes et au moins une variable de classe pour stocker le message :
- * put : écrit le message d'un thread producteur dans la variable
- * get : récupère la valeur de la variable
- * Les threads producteurs écrivent un message dans la boîte aux lettres lorsque la variable est vide.
- * Le thread consommateur affiche le contenu de la variable puis la vide.
- *
- * @author N. Ménard
- * @version 20161104-f
- * 
- **/
 class Consommateur implements Runnable {
 	private BufferedWriter fluxOut;
 
@@ -40,37 +17,57 @@ class Consommateur implements Runnable {
 		while(true){
 			tmp = Gestionnaire.bal.get();
 
-            System.out.println("Message "+tmp[1]+" : "+tmp[0]);
+            
+            if(tmp[1].equals("all") || tmp[1].charAt(0) == 'f'){
+                tmp[0] = "Serveur -> "+tmp[0];
+            }else if (tmp[1].charAt(0) != 'f'){
+            	int i=0, trouve=0;
+            	do {
+            		if(tmp[1].equals(Gestionnaire.threads.get(i).getName())){
+                		tmp[0] = ((Producteur)Gestionnaire.threads.get(i)).getPseudo()+" -> "+tmp[0];
+                		trouve = 1;
+            		}
+            		i++;
+            	}while(i<Gestionnaire.threads.size() || trouve==0);
+            }
 
+            //System.out.println("Conso : Message à envoyer : "+tmp[1]+" : "+tmp[0]);
+            
 			for (Thread threadCli: Gestionnaire.threads) {
+				//Message serveur envoyé à tout le monde
                 if(tmp[1].equals("all")){
-                    tmp[1] = "Serveur -> "+tmp[1];
-                    try {
-                        fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
-                        fluxOut.newLine();
-                        fluxOut.flush();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                	envoie(tmp[0], threadCli);
 
-                }else if(((Producteur)threadCli).getPseudo() != null){
+                }
 
-					if(!tmp[1].equals(threadCli.getName())){
-						//ENVOI MESSAGE A TOUT LE MONDE SAUF L'ENVOYEUR
-                        tmp[1] = ((Producteur)threadCli).getPseudo()+" -> "+tmp[1];
-						try {
-							fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
-							fluxOut.newLine();
-							fluxOut.flush();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
+                //message délivré à un seul client
+                else if(tmp[1].charAt(0) == 'f'){
+					if(tmp[1].substring(1).equals(threadCli.getName())){
+						envoie(tmp[0], threadCli);
 					}
 				}
 
+                //Envoie message à tous les clients sauf l'envoyeur
+                else if(((Producteur)threadCli).getPseudo() != null){
+
+					if(!tmp[1].equals(threadCli.getName())){
+						envoie(tmp[0], threadCli);
+					}
+				}
 			}
 		}
 		
 	}// fin du run
+
+
+	public void envoie(String msg, Thread threadCli){
+		try {
+			fluxOut = new BufferedWriter(new OutputStreamWriter(((Producteur) threadCli).getSocketCli().getOutputStream()));
+			fluxOut.write(msg);
+			fluxOut.newLine();
+			fluxOut.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
