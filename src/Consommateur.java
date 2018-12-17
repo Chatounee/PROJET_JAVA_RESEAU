@@ -35,23 +35,25 @@ class Consommateur implements Runnable {
             
 			for (Thread threadCli: Gestionnaire.threads) {
 				//Message serveur envoyé à tout le monde
-                if(tmp[1].equals("all")){
-                	envoie(tmp[0], threadCli);
-
-                }
-
-                //message délivré à un seul client
-                else if(tmp[1].charAt(0) == 'f'){
-					if(tmp[1].substring(1).equals(threadCli.getName())){
+				if(threadCli.getState() != Thread.State.TERMINATED){
+					if(tmp[1].equals("all")){
 						envoie(tmp[0], threadCli);
+
 					}
-				}
 
-                //Envoie message à tous les clients sauf l'envoyeur
-                else if(((Producteur)threadCli).getPseudo() != null){
+					//message délivré à un seul client
+					else if(tmp[1].charAt(0) == 'f'){
+						if(tmp[1].substring(1).equals(threadCli.getName())){
+							envoie(tmp[0], threadCli);
+						}
+					}
 
-					if(!tmp[1].equals(threadCli.getName())){
-						envoie(tmp[0], threadCli);
+					//Envoie message à tous les clients sauf l'envoyeur
+					else if(((Producteur)threadCli).getPseudo() != null){
+
+						if(!tmp[1].equals(threadCli.getName())){
+							envoie(tmp[0], threadCli);
+						}
 					}
 				}
 			}
